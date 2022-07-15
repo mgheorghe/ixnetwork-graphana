@@ -50,27 +50,17 @@ prometheus:
     image: ixnetworkweb_9.20.2112.27_image
     container_name: ixnetwork
     restart: unless-stopped
+    privileged: true
+    expose:
+      - 11009
+    ports:
+      - 11009:11009
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup
+      - /var/crash/:/var/crash
+      - ./ixn:/root/.local/share/Ixia/sdmStreamManager/common
+      - ./ixn:/root/.local/share/Ixia/IxNetwork/data/result
+      - ./ixn:/root/.local/share/IXIA/IxNetwork.Globals
+    tmpfs:
+      - /run
 
-
-
-
-
-
-docker run --net <bridge name> \
-          --ip <container ip> \
-          --hostname <hostname> \
-	  --name <container name> \
-	  --privileged \
-	  --restart=always \
-	  --cap-add=SYS_ADMIN \
-          --cap-add=SYS_TIME \
-          --cap-add=NET_ADMIN \
-          --cap-add=SYS_PTRACE \
-          -i -d \
-          -v /sys/fs/cgroup:/sys/fs/cgroup \
-          -v /var/crash/=/var/crash \
-          -v <host configs location>:/root/.local/share/Ixia/sdmStreamManager/common \
-          -v <host results location>:/root/.local/share/Ixia/IxNetwork/data/result \
-          -v <host settingslocation>:/root/.local/share/IXIA/IxNetwork.Globals \
-          --tmpfs /run \
-          <image name>  <-- Get image name from step 4
