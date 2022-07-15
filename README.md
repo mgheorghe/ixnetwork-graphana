@@ -14,7 +14,8 @@ download `https://support.ixiacom.com/version/ixnetwork-920` `IxNetwork Web Edit
 copy the `Ixia_IxNetworkWeb_Docker_9.20.2112.27.tar.bz2` in `ixnetwork-graphana` folder
 
 ```
-
-docker load -i ./Ixia_IxNetworkWeb_Docker_9.20.2112.27.tar.bz2
+tar xjf ./Ixia_IxNetworkWeb_Docker_9.20.2112.27.tar.bz2
+docker load -i ./Ixia_IxNetworkWeb_Docker_9.20.2112.27.tar
+ 
 docker-compose up -d
 ```
