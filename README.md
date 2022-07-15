@@ -18,4 +18,6 @@ tar xjf ./Ixia_IxNetworkWeb_Docker_9.20.2112.27.tar.bz2
 docker load -i ./Ixia_IxNetworkWeb_Docker_9.20.2112.27.tar
  
 docker-compose up -d
+
+docker-compose stop
 ```
