@@ -1,0 +1,199 @@
+services:
+  prometheus:
+      image: prom/prometheus:latest
+      container_name: ixnetwork_prometheus
+      depends_on:
+      - "ixnetwork"
+      restart: unless-stopped
+      volumes:
+        - ./data/prometheus/config:/etc/prometheus/
+        - ./data/prometheus/data:/prometheus
+      command:
+        - '-config.file=/etc/prometheus/prometheus.yml'
+        - '-storage.local.path=/prometheus'
+        - '-alertmanager.url=http://alertmanager:9093'
+      expose:
+        - 9090
+      ports:
+        - 9090:9090
+      links:
+        - node-exporter:node-exporter
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: ixnetwork_node_exporter
+    restart: unless-stopped
+    expose:
+      - 9100
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: ixnetwork_grafana
+    restart: unless-stopped
+    expose:
+      - 3000
+    ports:
+      - 3000:3000
+    links:
+      - prometheus:prometheus
+    volumes:
+      - ./data/grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_DOMAIN=ixngra.com
+      # - GF_SMTP_ENABLED=true
+      # - GF_SMTP_HOST=smtp.gmail.com:587
+      # - GF_SMTP_USER=myadrress@gmail.com
+      # - GF_SMTP_PASSWORD=mypassword
+      # - GF_SMTP_FROM_ADDRESS=myaddress@gmail.com
+
+
+  ixnetwork:
+    image: ixnetworkweb_9.20.2112.27_image
+    container_name: ixnetwork
+    restart: unless-stopped
+    privileged: true
+    expose:
+      - 11009
+      - 443
+    ports:
+      - 11009:11009
+      - 443:443
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup
+      - /var/crash/:/var/crash
+      - ./data/ixnetwork/common:/root/.local/share/Ixia/sdmStreamManager/common
+      - ./data/ixnetwork/result:/root/.local/share/Ixia/IxNetwork/data/result
+      - ./data/ixnetwork/IxNetwork.Globals:/root/.local/share/IXIA/IxNetwork.Globals
+    tmpfs:
+      - /run
+
+
+
+docker run -i -d ixnetworkweb_9.20.2112.27_image
+
+
+
+docker network create -d macvlan -o parent=ens33 --subnet=192.168.57.0/24 --gateway=192.168.57.254 ixn_br
+
+docker run \
+  --net ixn_br \
+  --ip 192.168.57.11 \
+  --hostname ixnetwork \
+  --name ixnetwork \
+  --privileged \
+  --restart=always \
+  --cap-add=SYS_ADMIN \
+  --cap-add=SYS_TIME \
+  --cap-add=NET_ADMIN \
+  --cap-add=SYS_PTRACE \
+  -i -d \
+  -v /sys/fs/cgroup:/sys/fs/cgroup \
+  -v /var/crash/:/var/crash \
+  -v /root/ixnetwork-graphana/data/ixnetwork/common:/root/.local/share/Ixia/sdmStreamManager/common \
+  -v /root/ixnetwork-graphana/data/ixnetwork/result:/root/.local/share/Ixia/IxNetwork/data/result \
+  -v /root/ixnetwork-graphana/data/ixnetwork/IxNetwork.Globals:/root/.local/share/IXIA/IxNetwork.Globals \
+  --tmpfs /run \
+  ixnetworkweb_9.20.2112.27_image
+
+
+
+
+dockercommand = """docker run --net dockerContNetwork --ip %s \
+--hostname dockerContTestHost \
+--name dockerContTest \
+--privileged --restart=always \
+--cap-add=SYS_ADMIN \
+--cap-add=SYS_TIME \
+--cap-add=NET_ADMIN \
+--cap-add=SYS_PTRACE \
+--cpus="12" \
+--memory="24g" \
+-i -d \
+-v /sys/fs/cgroup:/sys/fs/cgroup \
+-v /var/crash/=/var/crash \
+-v /opt/container/one/configs:/root/.local/share/Ixia/sdmStreamManager/common \
+-v /opt/container/one/results:/root/.local/share/Ixia/IxNetwork/data/result \
+-v /opt/container/one/settings:/root/.local/share/IXIA/IxNetwork.Globals \
+--tmpfs /run %s"""
+
+docker_network_cmd = """docker network create \
+-d macvlan \
+-o parent=%s \
+--subnet %s \
+--gateway=%s \
+dockerContNetwork"""
+
+
+
+docker network rm ixn_br
+docker stop ixnetwork
+docker container rm -f ixnetwork
+#docker rmi ixnetworkweb_9.20.2112.27_image
+
+docker rm -f $(docker ps -a -q)
+
+docker rmi -f $(docker images -q)
+
+
+docker load --input ./Ixia_IxNetworkWeb_Docker_9.20.2112.27.tar
+
+rm ./Ixia_IxNetworkWeb_Docker_9.20.2112.27.tar
+
+tar -xvjf Ixia_IxNetworkWeb_Docker_9.20.2112.27.tar.bz2
+
+docker load --input ./Ixia_IxNetworkWeb_Docker_9.20.2112.27.tar
+
+
+
+                    log.info(lcli.bound_sh("docker network rm dockerContNetwork"))
+                    log.info(lcli.bound_sh("docker container rm -f dockerContTest"))
+                    #remove any previous docer images
+                    log.info(lcli.bound_sh("docker rm -f $(docker ps -a -q)"))
+                    log.info(lcli.bound_sh("docker rmi -f $(docker images -q)"))
+                    log.info("Loading docker image")
+                    lout = lcli.bound_sh("docker load --input %s" % (os.path.join(remote_flocation,files[0])))
+                    dckr_image = lcli.bound_sh('docker images --format "{{.Repository}}"')
+                    log.info("Image Name:"+dckr_image)
+                    dkr_info = self.kwa_args['all_kwa']
+
+
+
+                    nout = lcli.bound_sh(docker_network_cmd % (dkr_info['docker_int'],dkr_info['docker_subnet'],dkr_info['docker_gateway']))
+                    log.info(dockercommand % (self.kwa_args['all_kwa']['docker_ip'],dckr_image))
+                    rout = lcli.bound_sh(dockercommand % (self.kwa_args['all_kwa']['docker_ip'],dckr_image))
+                    PYTHARConf.client_docker=self.kwa_args['all_kwa']['docker_ip']
+                    log.info("ClientIP Docker: " + str(PYTHARConf.client_docker))
+
+
+
+docker run --network host \
+  --name ixnetwork \
+  --privileged \
+  --restart=always \
+  --cap-add=SYS_ADMIN \
+  --cap-add=SYS_TIME \
+  --cap-add=NET_ADMIN \
+  --cap-add=SYS_PTRACE \
+  -i -d \
+  -v /sys/fs/cgroup:/sys/fs/cgroup \
+  -v /var/crash/:/var/crash \
+  -v /root/ixnetwork-graphana/data/ixnetwork/common:/root/.local/share/Ixia/sdmStreamManager/common \
+  -v /root/ixnetwork-graphana/data/ixnetwork/result:/root/.local/share/Ixia/IxNetwork/data/result \
+  -v /root/ixnetwork-graphana/data/ixnetwork/IxNetwork.Globals:/root/.local/share/IXIA/IxNetwork.Globals \
+  --tmpfs /run \
+  ixnetworkweb_9.20.2112.27_image
+
+
+
+		String cmd = "docker run --rm --network host ";
+		cmd += "--mount src=/regression,target=/regression,type=bind ";
+	    cmd += "--mount src=/home/" + aUser.getLinuxUser() + ",target=/home/" + aUser.getLinuxUser() + ",type=bind ";
+	    cmd += "--mount src=/etc/passwd,target=/etc/passwd,type=bind,readonly ";
+	    cmd += "--mount src=/etc/group,target=/etc/group,type=bind,readonly ";
+	    cmd += "--mount src=/etc/shadow,target=/etc/shadow,type=bind,readonly ";
+	    cmd += "--mount src=/etc/gshadow,target=/etc/gshadow,type=bind,readonly ";
+	    cmd += "--mount src=/etc/localtime,target=/etc/localtime,type=bind,readonly ";
+	    cmd += "--cidfile " + aUser.getHomeFolder() + "/pythar.cid ";
+	    cmd += "-d pythar/core ";
