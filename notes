@@ -200,5 +200,6 @@ docker run --network host \
 
 
 
-  461  docker-compose up -d
-  463  docker-compose stop
+docker-compose up -d
+docker-compose up  --build -d
+docker-compose stop
