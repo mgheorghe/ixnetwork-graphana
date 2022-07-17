@@ -21,3 +21,4 @@ docker-compose up -d
 
 docker-compose stop
 ```
+![dashboard](display.jpg)
