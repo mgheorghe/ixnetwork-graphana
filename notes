@@ -197,3 +197,8 @@ docker run --network host \
 	    cmd += "--mount src=/etc/localtime,target=/etc/localtime,type=bind,readonly ";
 	    cmd += "--cidfile " + aUser.getHomeFolder() + "/pythar.cid ";
 	    cmd += "-d pythar/core ";
+
+
+
+  461  docker-compose up -d
+  463  docker-compose stop
