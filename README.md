@@ -17,8 +17,8 @@ copy the `Ixia_IxNetworkWeb_Docker_10.40.2406.91.tar.bz2` in `ixnetwork-graphana
 tar xjf ./Ixia_IxNetworkWeb_Docker_10.40.2406.91.tar.bz2
 docker load -i ./Ixia_IxNetworkWeb_Docker_10.40.2406.91.tar
  
-docker-compose up -d
+docker compose up -d
 
-docker-compose stop
+docker compose stop
 ```
 ![dashboard](display.jpg)
